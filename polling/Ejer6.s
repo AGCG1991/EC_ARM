@@ -2,60 +2,62 @@
 
 /* Los pulsadores estan en los GPIOS 2 y 3*/
 .text
+	
 	mov	r0, #0b11010011
 	msr	cpsr_c, r0
-	mov	sp, #0x8000
+	mov	sp, #0x8000 @ init stack in SVC mode
+	ldr	r0, =STBASE @ stack
 	
-        ldr     r4, =GPBASE
+        ldr     r1, =GPBASE @ gpio offset
 /* guia bits           xx999888777666555444333222111000*/
-        ldr   	r5, =0b00001000000000000001000000000000
-        str	r5, [r4, #GPFSEL0]  @ Configura GPIO 4, 9 (SPEAKER, L Rojo)
-		
-/* guia bits           xx999888777666555444333222111000*/
-        ldr   	r5, =0b00000000001000000000000000000000
-        str	r5, [r4, #GPFSEL1]  @ Configura GPIO 17 (Led Amarillo)
+        ldr   	r2, =0b00001000000000000001000000000000
+        str	r2, [r1, #GPFSEL0]  @ Configura led amarillo GPIO 9 y speaker 4
+/* guia bits           xx999888777666555444333222111000*/	
+	ldr	r3, =0b00000000001000000000000000000000
+	str	r3, [r1, #GPFSEL1] @ configura led rojo GPIO 17
 	
 /* guia bits           10987654321098765432109876543210*/
-        ldr   	r5, =0b00000000000000000000000000010000 @ Speaker
-	ldr	r6, =0b00000000000000000000001000000000 @ Led Rojo
-	ldr	r7, =0b00000000000000100000000000000000 @ Led Amarillo
-	
-	ldr	r0, =STBASE
-	ldr	r1, =1908 @ frecuencia 262Hz
-	ldr	r2, =1278 @ frecuencia 391Hz
+        ldr   	r6, =0b00000000000000000000001000000000 @ gpio 9
+	ldr	r7, =0b00000000000000100000000000000000 @ gpio 17
+        ldr   	r8, =0b00000000000000000000000000010000 @ speaker 4
 
-bucle:
-	/*str	r5, [r4, #GPCLR0]	@ apaga speaker
-	str	r6, [r4, #GPCLR0]	@ apaga led rojo
-	str	r7, [r4, #GPCLR0]	@ apaga led amarillo*/
-	
-	ldr	r5, [r4, #GPLEV0]	@ direccion pulsador
+bucle:	
+	ldr	r4, [r1, #GPLEV0]
 	/* guia bits   10987654321098765432109876543210*/
-	tst	r5, #0b00000000000000000000000000000100
+	tst	r4, #0b00000000000000000000000000000100
 	beq	pulsador1
-	b	pulsador1
 	/* guia bits   10987654321098765432109876543210*/	
-	tst	r5, #0b00000000000000000000000000001000
+	tst	r4, #0b00000000000000000000000000001000
 	beq	pulsador2
-	b	bucle
+	str	r6, [r1, #GPCLR0] @ apagar los leds por defecto
+	str	r7, [r1, #GPCLR0]
+	b 	bucle
 	
-pulsador1:	
-	mov	r3, r1		@ cargamos en r3 la espera del 1
+pulsador1:
+	str	r6, [r1, #GPSET0]
+	ldr	r9, =1278		@ cambiar freq
 	bl	espera			@ Salta a la rutina de espera
-	str	r5, [r4, #GPSET0]	@ enciende speaker
+	str	r8, [r1, #GPSET0]	@ enciende speaker
 	bl	espera			@ Salta a la rutina de espera
-	str	r5, [r4, #GPCLR0]	@ apaga led
+	str	r8, [r1, #GPCLR0]	@ apaga speaker
 	b	bucle
 	
 pulsador2:
+	str	r7, [r1, #GPSET0]
+	ldr	r9, =955		@ cambiar freq
+	bl	espera			@ Salta a la rutina de espera
+	str	r8, [r1, #GPSET0]	@ enciende speaker
+	bl	espera			@ Salta a la rutina de espera
+	str	r8, [r1, #GPCLR0]	@ apaga speaker
 	b	bucle
+	
 
-espera:	push 	{r4, r5}		@ Save r5 and r6 in the stack
-	ldr	r4, [r0, #STCLO]	@ Load CLO Timer
-	add	r4, r3			@ Add waiting time -> this is our ending time
-ret1:	ldr	r5, [r0, #STCLO]
-	cmp	r5, r4
+espera:	push 	{r10, r11}		@ Save r5 and r6 in the stack
+	ldr	r10, [r0, #STCLO]	@ Load CLO Timer
+	add	r10, r9			@ Add waiting time -> this is our ending time
+ret1:	ldr	r11, [r0, #STCLO]
+	cmp	r11, r10
 	blo	ret1			@ If lower, go back to read timer again
-	pop	{r4, r5}		@ Restore r5 and r6
+	pop	{r10, r11}		@ Restore r5 and r6
 	bx	lr			@ Return from routine
 
