@@ -21,11 +21,16 @@
 /* guia bits           xx999888777666555444333222111000*/
         ldr     r1, =0b00000000001000000000000000001001
         str     r1, [r0, #GPFSEL1]
+/* guia bits           xx999888777666555444333222111000*/
         ldr     r1, =0b00000000001000000000000001000000
         str     r1, [r0, #GPFSEL2]
+		/* Como queremos hacer una "escalera" donde se vayan sucediendo el encendido de los leds , seleccionamos todos ellos 
+		en primer lugar con GPFSEL0, seleccionamos el GPIO 9
+		en segundo lugar con GPFSEL1, seleccionamos los GPIO´S 10, 11, 17
+		en tercer lugar con GPFSEL2, seleccionamos los GPIO´S 22,27 */
 	
 	
-/* guia bits           10987654321098765432109876543210*/
+/* guia bits       10987654321098765432109876543210*/
 	ldr     r2, =0b00000000000000000000001000000000 @ cargo el selector del gpio 9
 
 /* Programo contador C3 para futura interrupcion */

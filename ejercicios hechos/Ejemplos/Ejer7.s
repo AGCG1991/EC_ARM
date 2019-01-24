@@ -17,18 +17,17 @@
         mov     r1, #0b00001000000000000000000000000000
         str     r1, [r0, #GPFSEL0]
 
-/* Programo contador C3 para futura interrupcion */
+/* Programo contador C1 para futura interrupcion */
         ldr     r0, =STBASE
         ldr     r1, [r0, #STCLO]
-		ldr	r2, =500000     @ 0.5 segundos
-        add     r1, r2
-        str     r1, [r0, #STC3]
+        add     r1, #0x400000     @4,19 segundos
+        str     r1, [r0, #STC1]
 
 /* Habilito interrupciones, local y globalmente */
         ldr     r0, =INTBASE
-        mov     r1, #0b1000						@OJO AQUÍ HAY QUE CAMBIAR DIRECCIONES DE MEMORIA PARA C3 ES 1000, PARA C1 ES 0010
+        mov     r1, #0b0010
         str     r1, [r0, #INTENIRQ1]
-        mov     r0, #0b01010011   @ Modo SVC, IRQ activo @OJO AQUÍ HAY QUE CAMBIAR DIRECCIONES DE MEMORIA
+        mov     r0, #0b01010011   @ Modo SVC, IRQ activo
         msr     cpsr_c, r0
 
 /* Repetir para siempre */

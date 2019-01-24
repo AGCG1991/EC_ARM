@@ -52,6 +52,7 @@ irq_handler:
 	strne	r2, [r0, #GPCLR0] @ Apago LED
 
 	@ Clear Event de las interrupciones
+	/* Con esto libero los recursos y permito otra futura interrupcion*/
 	ldr  	r0, =STBASE
 	mov 	r1, #0b1000 @C3
 	str   	r1,[r0, #STCS]
