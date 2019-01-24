@@ -9,9 +9,11 @@
 bucle:
 /* guia bits           10987654321098765432109876543210*/
         ldr   	r1, =0b00000000000000100000000000000000
-        str     r1, [r0, #GPCLR0]   @ Enciende led amarillo GPIO 17
+        str     r1, [r0, #GPCLR0]   @ Apaga led 
+		
+		/* Para ello tenemos los puertos GPSETn y GPCLRn, donde GPSETn pone un 1 y GPCLRn pone un 0 */
 	
 /* guia bits           10987654321098765432109876543210*/
 	ldr   	r1, =0b00000000000000100000000000000000
-	ldr	r1, [r0, #GPSET0] @ Apaga led
+	ldr	r1, [r0, #GPSET0] @ Enciende led amarillo GPIO 17
 	b 	bucle
